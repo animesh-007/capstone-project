@@ -17,12 +17,6 @@ import numpy as np
 from tqdm import tqdm
 from shutil import copyfile
 
-# os.system("git clone https://github.com/BadourAlBahar/pose-with-style")
-# os.chdir("Thin-Plate-Spline-Motion-Model")
-# os.system("mkdir checkpoints")
-# os.system("wget -c https://cloud.tsinghua.edu.cn/f/da8d61d012014b12a9e4/?dl=1 -O checkpoints/vox.pth.tar")
-
-# os.chdir("/workspace/U-2-Net")
 from skimage import io, transform
 import torchvision
 from torch.autograd import Variable
@@ -83,50 +77,31 @@ DESCRIPTION = '''### Gradio demo for <b>Pose with Style: Detail-Preserving Pose-
 '''
 # FOOTER = '<img id="visitor-badge" alt="visitor badge" src="https://visitor-badge.glitch.me/badge?page_id=gradio-blocks.Image-Animation-using-Thin-Plate-Spline-Motion-Model" />'
 
-# os.chdir("/workspace/PWS")
 
 def inference(img, target, task, if_garment_transfer_then):
     os.system("rm -rf /workspace/PWS/test_data")
     os.system("rm -rf /workspace/PWS/result")
-    # if not os.path.exists('test_data'):
     os.makedirs('/workspace/PWS/test_data', exist_ok=True)
 
-    
-    # if task == 'repose':
-    #     img.save('test_data/source.png')
-    #     target.save('test_data/target_iuv.png')
-    #     source = "test_data/source.png"
-    #     target = "test_data/target_iuv.png"
-    # else:
     img.save('test_data/source.png')
     target.save('test_data/target.png')
     source = "test_data/source.png"
     target = "test_data/target.png"
-    # resizing input image
-    # import pdb; pdb.set_trace()
     
     img = cv2.imread(source, cv2.IMREAD_COLOR)
     h, w, _ = img.shape
-    # w,h = img.size
-    # if w > h: img = cv2.resize(img, (512, int((h*512)/w)))
-    # elif h > w: img = cv2.resize(img, (int((w*512)/h), 512))
-    # else: 
+     
     img = cv2.resize(img, (512, 512))
     cv2.imwrite('/workspace/PWS/test_data/source.png', img)
 
     # resizing target image
     target = cv2.imread(target, cv2.IMREAD_COLOR)
     h, w, _ = target.shape
-    # if w > h: target = cv2.resize(target, (512, int((h*512)/w)))
-    # elif h > w: target = cv2.resize(target, (int((w*512)/h), 512))
-    # else: 
+     
     target = cv2.resize(target, (512, 512))
-    # if task == 'repose':
-    #     cv2.imwrite('/workspace/PWS/test_data/target_iuv.png', target)
-    # else:
+    
     cv2.imwrite('/workspace/PWS/test_data/target.png', target)
 
-    # if task != 'repose':
     os.chdir('/workspace/detectron2/projects/DensePose')
     data_folder = '/workspace/PWS/test_data'
     os.system('rm -rf /workspace/PWS/test_data/.ipynb_checkpoints')
@@ -171,9 +146,7 @@ def inference(img, target, task, if_garment_transfer_then):
         --pretrained_model /workspace/PWS/checkpoints/posewithstyle.pt \
         --save_path /workspace/PWS/result")
     else: # 'Downsampled Image'
-    ####  Resize the longer edge of the input image
-        # if_garment_transfer_then = if_garment_transfer_then # "upper_body", "lower_body", "face"
-
+    
         print('garment transfer')
         os.system(f"MKL_SERVICE_FORCE_INTEL=1 python garment_transfer.py \
         --input_path ./test_data \
@@ -183,31 +156,7 @@ def inference(img, target, task, if_garment_transfer_then):
         --pretrained_model /workspace/PWS/checkpoints/posewithstyle.pt \
         --part {if_garment_transfer_then} \
         --save_path /workspace/PWS/result")
-    #   max_res = 512
-    #   width, height = img.size
-    #   if max(width,height) > max_res:
-    #     scale = max_res /max(width,height)
-    #     width = int(scale*width)
-    #     height = int(scale*height)
-    #     img = img.resize((width,height), Image.ANTIALIAS)
-      
-    # img.save("temp/image.jpg", "JPEG")
-
-    # if task == 'Motion Deblurring':
-    #   task = 'Motion_Deblurring'
-    #   os.system("python demo_gradio.py --task 'Motion_Deblurring' --input_path 'temp/image.jpg' --result_dir './temp/'")
-  
-    # if task == 'Defocus Deblurring':
-    #   task = 'Single_Image_Defocus_Deblurring'
-    #   os.system("python demo_gradio.py --task 'Single_Image_Defocus_Deblurring' --input_path 'temp/image.jpg' --result_dir './temp/'")
-  
-    # if task == 'Denoising':
-    #   task = 'Real_Denoising'
-    #   os.system("python demo_gradio.py --task 'Real_Denoising' --input_path 'temp/image.jpg' --result_dir './temp/'")
-  
-    # if task == 'Deraining':
-    #   os.system("python demo_gradio.py --task 'Deraining' --input_path 'temp/image.jpg' --result_dir './temp/'")
-  
+    
     return f'/workspace/PWS/result/final_image.png'
 
 gr.Interface(
